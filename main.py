@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 import os.path
 
 import tensorflow as tf
@@ -93,7 +94,7 @@ with tf.Session() as sess:
     print("Initializing parameters")
     sess.run(tf.initialize_all_variables())
 
-  for step in xrange(1, n_steps):
+  for step in range(1, n_steps):
     batch = mnist.train.next_batch(batch_size)
     feed_dict = {x: batch[0]}
     _, cur_loss, summary_str = sess.run([train_step, loss, summary_op], feed_dict=feed_dict)
@@ -101,6 +102,6 @@ with tf.Session() as sess:
 
     if step % 50 == 0:
       save_path = saver.save(sess, "save/model.ckpt")
-      print "Step {0} | Loss: {1}".format(step, cur_loss)
+      print("Step {0} | Loss: {1}".format(step, cur_loss))
 
 
