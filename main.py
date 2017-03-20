@@ -50,7 +50,7 @@ epsilon = tf.random_normal(tf.shape(logvar_encoder), name='epsilon')
 
 # Sample latent variable
 std_encoder = tf.exp(0.5 * logvar_encoder)
-z = mu_encoder + tf.mul(std_encoder, epsilon)
+z = mu_encoder + tf.multiply(std_encoder, epsilon)
 
 W_decoder_z_hidden = weight_variable([latent_dim,hidden_decoder_dim])
 b_decoder_z_hidden = bias_variable([hidden_decoder_dim])
@@ -66,17 +66,17 @@ l2_loss += tf.nn.l2_loss(W_decoder_hidden_reconstruction)
 KLD = -0.5 * tf.reduce_sum(1 + logvar_encoder - tf.pow(mu_encoder, 2) - tf.exp(logvar_encoder), reduction_indices=1)
 
 x_hat = tf.matmul(hidden_decoder, W_decoder_hidden_reconstruction) + b_decoder_hidden_reconstruction
-BCE = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(x_hat, x), reduction_indices=1)
+BCE = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(logits=x_hat, labels=x), reduction_indices=1)
 
 loss = tf.reduce_mean(BCE + KLD)
 
 regularized_loss = loss + lam * l2_loss
 
-loss_summ = tf.scalar_summary("lowerbound", loss)
+loss_summ = tf.summary.scalar("lowerbound", loss)
 train_step = tf.train.AdamOptimizer(0.01).minimize(regularized_loss)
 
 # add op for merging summary
-summary_op = tf.merge_all_summaries()
+summary_op = tf.summary.merge_all()
 
 # add Saver ops
 saver = tf.train.Saver()
@@ -85,14 +85,14 @@ n_steps = int(1e6)
 batch_size = 100
 
 with tf.Session() as sess:
-  summary_writer = tf.train.SummaryWriter('experiment',
+  summary_writer = tf.summary.FileWriter('experiment',
                                           graph=sess.graph)
   if os.path.isfile("save/model.ckpt"):
     print("Restoring saved parameters")
     saver.restore(sess, "save/model.ckpt")
   else:
     print("Initializing parameters")
-    sess.run(tf.initialize_all_variables())
+    sess.run(tf.global_variables_initializer())
 
   for step in range(1, n_steps):
     batch = mnist.train.next_batch(batch_size)
